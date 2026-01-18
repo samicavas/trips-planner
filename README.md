@@ -1,4 +1,4 @@
-# 🌍 Trips Planner - React Native Expo App
+# Trips Planner - React Native Expo App
 
 A modern React Native application built with Expo Router for planning and managing trips with daily notes. Fully integrated with Supabase for backend operations and authentication.
 
@@ -6,39 +6,25 @@ A modern React Native application built with Expo Router for planning and managi
 
 ---
 
-## � Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Setup Instructions](#setup-instructions)
-- [Project Structure](#project-structure)
-- [Database Schema](#database-schema)
-- [Key Assumptions & Trade-offs](#key-assumptions--trade-offs)
-- [Known Issues & Workarounds](#known-issues--workarounds)
-- [Future Improvements](#future-improvements)
-- [Contributing](#contributing)
-
----
-
-## ✨ Features
+## Features
 
 ### Core Functionality
-- 🔐 **Authentication**: Sign up, Sign in, and session management with Supabase Auth
-- ✈️ **Trip Management**: Create, read, update, and delete trips
-- 📍 **Destination Tracking**: Add and view destination for each trip
-- 📝 **Daily Notes**: Add per-day notes for each trip with date selection
-- 🗓️ **Date Range Planning**: Set start and end dates for trips
-- 📱 **Responsive UI**: Beautiful, touch-optimized interface
+- **Authentication**: Sign up, Sign in, and session management with Supabase Auth
+- **Trip Management**: Create, read, update, and delete trips
+- **Destination Tracking**: Add and view destination for each trip
+- **Daily Notes**: Add per-day notes for each trip with date selection
+- **Date Range Planning**: Set start and end dates for trips
+- **Responsive UI**: Beautiful, touch-optimized interface
 
 ### Technical Features
-- ✅ **Form Validation**: Zod schema validation for all user inputs
-- 🎨 **Centralized Styling**: Consistent design system across modules
-- 🔒 **Row Level Security (RLS)**: Supabase RLS policies for data protection
-- 🏗️ **Modular Architecture**: Feature-based folder structure for scalability
+- **Form Validation**: Zod schema validation for all user inputs
+- **Centralized Styling**: Consistent design system across modules
+- **Row Level Security (RLS)**: Supabase RLS policies for data protection
+- **Modular Architecture**: Feature-based folder structure for scalability
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - **React Native** with **Expo** framework
@@ -59,7 +45,7 @@ A modern React Native application built with Expo Router for planning and managi
 
 ---
 
-## 🚀 Setup Instructions
+## Setup Instructions
 
 ### Prerequisites
 - **Node.js** (v16 or higher)
@@ -83,7 +69,7 @@ npm install
 yarn install
 ```
 
-### Step 5: Run the Development Server
+### Step 3: Run the Development Server
 
 #### For Development (Expo Go)
 ```bash
@@ -91,14 +77,12 @@ npm run start
 # or
 expo start
 ```
-
 Then:
 - **iOS**: Press `i` or scan QR code with camera
-- **Android**: Press `a` or scan QR code with Expo Go app
 
 #### For Native Build (Prebuild)
 
-⚠️ **Important Setup:**
+**Important Setup:**
 1. Install Apple Developer tools (Xcode) for iOS
 2. Install Android Studio for Android
 
@@ -122,7 +106,7 @@ npm test
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 trips-planner/
@@ -167,7 +151,7 @@ trips-planner/
 │       └── services/
 │           └── supabase.ts                # Supabase client config
 │
-├── .env                                    # Environment variables (not in git)
+├── .env                                    # Environment variables
 ├── .env.example                           # Example env template
 ├── package.json
 ├── tsconfig.json
@@ -177,7 +161,7 @@ trips-planner/
 
 ---
 
-## 🗄️ Database Schema
+## Database Schema
 
 ### Tables Overview
 
@@ -192,10 +176,6 @@ trips-planner/
 | `start_date` | DATE | NOT NULL | Trip start date |
 | `end_date` | DATE | NOT NULL | Trip end date |
 | `created_at` | TIMESTAMP | Default: NOW() | Creation timestamp |
-| `updated_at` | TIMESTAMP | Default: NOW() | Last update timestamp |
-
-**Indexes:**
-- `idx_trips_user_id` - Fast user trip lookups
 
 ---
 
@@ -209,67 +189,11 @@ trips-planner/
 | `title` | TEXT | NOT NULL | Note title (min 2 chars) |
 | `content` | TEXT | NOT NULL | Note content |
 | `created_at` | TIMESTAMP | Default: NOW() | Creation timestamp |
-| `updated_at` | TIMESTAMP | Default: NOW() | Last update timestamp |
+| `update_at` | TIMESTAMP | Default: NOW() | Creation timestamp |
 | `UNIQUE(trip_id, note_date)` | CONSTRAINT | | One note per day per trip |
-
-**Indexes:**
-- `idx_trip_notes_trip_id` - Fast trip note lookups
-- `idx_trip_notes_user_id` - Fast user note lookups
-- `idx_trip_notes_note_date` - Fast date-based queries
-
 ---
 
-### Row Level Security (RLS) Summary
-
-**All tables have RLS enabled with these policies:**
-
-| Policy | Table | Action | Condition |
-|--------|-------|--------|-----------|
-| Users can view their own trips | trips | SELECT | `auth.uid() = user_id` |
-| Users can insert their own trips | trips | INSERT | `auth.uid() = user_id` |
-| Users can update their own trips | trips | UPDATE | `auth.uid() = user_id` |
-| Users can delete their own trips | trips | DELETE | `auth.uid() = user_id` |
-| Users can view their own trip notes | trip_notes | SELECT | `auth.uid() = user_id` |
-| Users can insert notes for their own trips | trip_notes | INSERT | `auth.uid() = user_id` |
-| Users can update their own notes | trip_notes | UPDATE | `auth.uid() = user_id` |
-| Users can delete their own notes | trip_notes | DELETE | `auth.uid() = user_id` |
-
----
-
-## 🔍 Key Assumptions & Trade-offs
-
-### Assumptions
-
-1. **User Authentication**
-   - Users must create an account before using the app
-   - Session persistence is handled automatically by Supabase
-   - Email verification is not enforced (can be enabled in Supabase settings)
-
-2. **Data Integrity**
-   - Trip dates are always valid (end_date > start_date enforced in schema)
-   - One note per date per trip (UNIQUE constraint)
-   - Cascade deletion: Deleting a trip deletes all associated notes
-
-3. **User Experience**
-   - Turkish locale (`tr-TR`) is hardcoded for date formatting
-   - Bottom Sheet modals for date picker (more intuitive on mobile)
-   - Formik for form state management (proven, stable)
-
-### Trade-offs
-
-| Decision | Reason | Alternative |
-|----------|--------|-------------|
-| **Formik** instead of React Hook Form | Easier integration with Zod, simpler for this project | RHF is more performant for large forms |
-| **Bottom Sheet Modals** for dates | Better UX on mobile devices | Native date picker (platform-specific) |
-| **Centralized Styling** (StyleSheet) | Consistency across modules | CSS-in-JS libraries (less overhead) |
-| **Turkish locale hardcoded** | Client requirement | Dynamic locale selection |
-| **Supabase instead of custom backend** | Rapid development, built-in auth | Firebase, self-hosted backend |
-| **Row-level Security (RLS)** | Secure at DB level, reduces API logic | Application-level permission checks |
-
----
-
-
-## 📝 Validation Schemas
+## Validation Schemas
 
 ### Trip Validation
 - **Title**: Minimum 3 characters, required
