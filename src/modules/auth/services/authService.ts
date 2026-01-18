@@ -1,315 +1,282 @@
 import { supabaseClient } from '@/src/shared/services/supabase';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
+WebBrowser.maybeCompleteAuthSession()
 
 export interface AuthError {
-  message: string;
-  code?: string;
+    message: string;
+    code?: string;
 }
 
 export interface AuthResponse {
-  success: boolean;
-  data?: any;
-  error?: AuthError;
+    success: boolean;
+    data?: any;
+    error?: AuthError;
 }
 
-/**
- * Sign in with email OTP (Magic Link)
- */
-export const signInWithEmail = async (email: string): Promise<AuthResponse> => {
-  try {
-    const redirectUrl = Linking.createURL('/');
-    
-    const { error } = await supabaseClient.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: redirectUrl,
-      },
-    });
 
-    if (error) {
-      return {
-        success: false,
-        error: {
-          message: error.message,
-          code: error.code,
-        },
-      };
-    }
-
-    return {
-      success: true,
-      data: { email },
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: {
-        message: 'Email giriş işlemi sırasında bir hata oluştu',
-      },
-    };
-  }
-};
-
-/**
- * Sign up with email and password
- */
 export const signUpWithEmail = async (
-  email: string,
-  password: string
+    email: string,
+    password: string
 ): Promise<AuthResponse> => {
-  try {
-    const { data, error } = await supabaseClient.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: Linking.createURL('/'),
-      },
-    });
+    try {
+        const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+                emailRedirectTo: Linking.createURL('/'),
+            },
+        });
 
-    if (error) {
-      return {
-        success: false,
-        error: {
-          message: error.message,
-          code: error.code,
-        },
-      };
-    }
-
-    return {
-      success: true,
-      data: {
-        user: data.user,
-        session: data.session,
-      },
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: {
-        message: 'Kayıt işlemi sırasında bir hata oluştu',
-      },
-    };
-  }
-};
-
-/**
- * Sign in with email and password
- */
-export const signInWithPassword = async (
-  email: string,
-  password: string
-): Promise<AuthResponse> => {
-  try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      return {
-        success: false,
-        error: {
-          message: error.message,
-          code: error.code,
-        },
-      };
-    }
-
-    return {
-      success: true,
-      data: {
-        user: data.user,
-        session: data.session,
-      },
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: {
-        message: 'Giriş işlemi sırasında bir hata oluştu',
-      },
-    };
-  }
-};
-
-/**
- * Sign in with Google OAuth
- */
-export const signInWithGoogle = async (): Promise<AuthResponse> => {
-  try {
-    const redirectUrl = Linking.createURL('/');
-    console.log('Redirect URL:', redirectUrl);
-
-    // Sign in with OAuth
-    const { data, error } = await supabaseClient.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectUrl,
-        skipBrowserRedirect: true,
-      },
-    });
-
-    if (error) {
-      return {
-        success: false,
-        error: {
-          message: error.message,
-          code: error.code,
-        },
-      };
-    }
-
-    if (!data?.url) {
-      return {
-        success: false,
-        error: {
-          message: 'OAuth URL alınamadı',
-        },
-      };
-    }
-
-    console.log('OAuth URL:', data.url);
-
-    // Open the URL in web browser
-    const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
-
-    console.log('WebBrowser result:', result);
-
-    if (result.type === 'success') {
-      // Extract the URL from the result
-      const url = result.url;
-      console.log('Callback URL:', url);
-
-      if (url) {
-        try {
-          // Parse the URL to get the token data
-          const urlObj = new URL(url);
-          const fragmentParams = new URLSearchParams(
-            urlObj.hash.substring(1)
-          );
-          const accessToken = fragmentParams.get('access_token');
-          const refreshToken = fragmentParams.get('refresh_token');
-
-          if (accessToken) {
-            // Create session from tokens
-            const { data: sessionData, error: sessionError } =
-              await supabaseClient.auth.setSession({
-                access_token: accessToken,
-                refresh_token: refreshToken || '',
-              });
-
-            if (sessionError) {
-              console.error('Session error:', sessionError);
-              return {
+        if (error) {
+            return {
                 success: false,
                 error: {
-                  message: 'Oturum oluşturulamadı',
+                    message: error.message,
+                    code: error.code,
                 },
-              };
-            }
+            };
+        }
 
-            if (sessionData?.session) {
-              console.log('Session created:', sessionData.session.user.email);
-              return {
-                success: true,
-                data: { session: sessionData.session },
-              };
-            }
-          }
-        } catch (parseError) {
-          console.error('URL parse error:', parseError);
-          return {
+        return {
+            success: true,
+            data: {
+                user: data.user,
+                session: data.session,
+            },
+        };
+    } catch (error) {
+        return {
             success: false,
             error: {
-              message: 'Callback URL işlenirken hata oluştu',
+                message: 'Error occurred during sign up',
             },
-          };
+        };
+    }
+};
+
+export const signInWithPassword = async (
+    email: string,
+    password: string
+): Promise<AuthResponse> => {
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (error) {
+            return {
+                success: false,
+                error: {
+                    message: error.message,
+                    code: error.code,
+                },
+            };
         }
-      }
-    } else if (result.type === 'cancel' || result.type === 'dismiss') {
-      console.log('OAuth cancelled');
-      return {
-        success: false,
-        error: {
-          message: 'Google giriş iptal edildi',
-        },
-      };
-    }
 
-    return {
-      success: false,
-      error: {
-        message: 'Bilinmeyen hata oluştu',
-      },
-    };
-  } catch (error) {
-    console.error('Google sign-in error:', error);
-    return {
-      success: false,
-      error: {
-        message: 'Google giriş işlemi sırasında bir hata oluştu',
-      },
-    };
-  }
+        return {
+            success: true,
+            data: {
+                user: data.user,
+                session: data.session,
+            },
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: {
+                message: 'Error occurred during sign in',
+            },
+        };
+    }
 };
 
-/**
- * Get current user session
- */
+export const signInWithGoogle = async (): Promise<AuthResponse> => {
+    try {
+        const redirectUrl = Linking.createURL('/oauth');
+
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: redirectUrl,
+                skipBrowserRedirect: false,
+            },
+        });
+
+        if (error) {
+            return {
+                success: false,
+                error: {
+                    message: error.message,
+                    code: error.code,
+                },
+            };
+        }
+
+        if (!data?.url) {
+            return {
+                success: false,
+                error: {
+                    message: 'OAuth URL not available',
+                },
+            };
+        }
+        const result = await WebBrowser.openAuthSessionAsync(
+            data.url,
+            redirectUrl,
+            {
+                showInRecents: true,
+                dismissButtonStyle: 'close',
+            }
+        );
+
+
+        if (result.type === 'success') {
+            const url = result.url;
+
+            if (url) {
+                try {
+                    // Parse the returned URL to extract session tokens
+                    const urlObj = new URL(url);
+                    const fragmentParams = new URLSearchParams(urlObj.hash.substring(1));
+
+                    const accessToken = fragmentParams.get('access_token');
+                    const refreshToken = fragmentParams.get('refresh_token');
+
+                    if (accessToken && refreshToken) {
+                        const { data: sessionData, error: sessionError } =
+                            await supabaseClient.auth.setSession({
+                                access_token: accessToken,
+                                refresh_token: refreshToken,
+                            });
+
+                        if (sessionError) {
+                            console.error('Session error:', sessionError);
+                            return {
+                                success: false,
+                                error: {
+                                    message: 'Failed to create session',
+                                },
+                            };
+                        }
+
+                        if (sessionData?.session) {
+                            return {
+                                success: true,
+                                data: {
+                                    session: sessionData.session,
+                                    user: sessionData.session.user
+                                },
+                            };
+                        }
+                    } else {
+                        console.warn('No tokens in callback URL');
+                        const { data: userData } = await supabaseClient.auth.getSession();
+                        if (userData?.session) {
+                            return {
+                                success: true,
+                                data: {
+                                    session: userData.session,
+                                    user: userData.session.user
+                                },
+                            };
+                        }
+                    }
+                } catch (parseError) {
+                    console.error('URL parse error:', parseError);
+                    const { data: userData } = await supabaseClient.auth.getSession();
+                    if (userData?.session) {
+                        return {
+                            success: true,
+                            data: {
+                                session: userData.session,
+                                user: userData.session.user
+                            },
+                        };
+                    }
+                    return {
+                        success: false,
+                        error: {
+                            message: 'Error processing authentication',
+                        },
+                    };
+                }
+            }
+        } else if (result.type === 'cancel' || result.type === 'dismiss') {
+            return {
+                success: false,
+                error: {
+                    message: 'Google sign-in cancelled',
+                },
+            };
+        }
+
+        return {
+            success: false,
+            error: {
+                message: 'Unknown error occurred during Google sign-in',
+            },
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: {
+                message: 'Error occurred during Google sign-in',
+            },
+        };
+    }
+};
+
 export const getCurrentSession = async () => {
-  try {
-    const { data, error } = await supabaseClient.auth.getSession();
+    try {
+        const { data, error } = await supabaseClient.auth.getSession();
 
-    if (error) {
-      return {
-        success: false,
-        error: {
-          message: error.message,
-        },
-      };
+        if (error) {
+            return {
+                success: false,
+                error: {
+                    message: error.message,
+                },
+            };
+        }
+
+        return {
+            success: true,
+            data: data.session,
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: {
+                message: 'Session could not be retrieved',
+            },
+        };
     }
-
-    return {
-      success: true,
-      data: data.session,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: {
-        message: 'Session alınamadı',
-      },
-    };
-  }
 };
 
-/**
- * Sign out
- */
 export const signOut = async (): Promise<AuthResponse> => {
-  try {
-    const { error } = await supabaseClient.auth.signOut();
+    try {
+        const { error } = await supabaseClient.auth.signOut();
 
-    if (error) {
-      return {
-        success: false,
-        error: {
-          message: error.message,
-        },
-      };
+        if (error) {
+            return {
+                success: false,
+                error: {
+                    message: error.message,
+                },
+            };
+        }
+
+        return {
+            success: true,
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: {
+                message: 'Error occurred during sign out',
+            },
+        };
     }
-
-    return {
-      success: true,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: {
-        message: 'Çıkış işlemi sırasında hata oluştu',
-      },
-    };
-  }
 };
