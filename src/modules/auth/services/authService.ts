@@ -94,7 +94,7 @@ export const signInWithPassword = async (
 
 export const signInWithGoogle = async (): Promise<AuthResponse> => {
     try {
-        const redirectUrl = Linking.createURL('/oauth');
+        const redirectUrl = Linking.createURL('/');
 
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
