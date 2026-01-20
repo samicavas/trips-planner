@@ -63,8 +63,6 @@ export default function SignInPage() {
         try {
             setGoogleLoading(true);
             const response = await signInWithGoogle();
-            console.log('Google sign-in response:', response);
-
             if (response.success) {
                 Alert.alert('Success', 'Signed in with Google successfully!');
                 router.replace('/screens/TripsScreen' as any);

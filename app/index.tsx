@@ -17,8 +17,6 @@ export default function Index() {
       const response = await getCurrentSession();
       if (response.success && response.data?.user) {
         router.replace('/screens/TripsScreen' as any);
-      } else {
-        router.replace('/screens/SignInScreen' as any);
       }
     } catch (error) {
       console.error('Session check error:', error);

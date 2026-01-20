@@ -20,7 +20,6 @@ export default function SignUpPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    // Validate form data with Zod
     const validateForm = (values: SignUpFormValues) => {
         try {
             signUpSchema.parse(values);
@@ -38,7 +37,6 @@ export default function SignUpPage() {
         }
     };
 
-    // Handle sign-up
     const handleSignUp = async (values: SignUpFormValues) => {
         try {
             setLoading(true);
@@ -69,7 +67,7 @@ export default function SignUpPage() {
     return (
         <ScrollView contentContainerStyle={authStyles.container}>
             <View style={authStyles.authPageContainer}>
-                {/* Logo/Header */}
+                {/* Header */}
                 <View style={authStyles.signInHeaderContainer}>
                     <Text style={authStyles.authLogo}>
                         Trips Planner
