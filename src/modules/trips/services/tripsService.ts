@@ -15,7 +15,6 @@ export const insertTrip = async (trip: Trip): Promise<TripResponseDto> => {
       };
     }
 
-    // Insert trip
     const { data, error } = await supabaseClient
       .from('trips')
       .insert([
@@ -51,12 +50,8 @@ export const insertTrip = async (trip: Trip): Promise<TripResponseDto> => {
   }
 };
 
-/**
- * Fetch all trips for current user
- */
 export const fetchUserTrips = async (): Promise<TripResponseDto> => {
   try {
-    // Get current user
     const {
       data: { user },
       error: userError,
@@ -72,7 +67,6 @@ export const fetchUserTrips = async (): Promise<TripResponseDto> => {
 
     console.log('Fetching trips for user:', user.id);
 
-    // Fetch trips
     const { data, error } = await supabaseClient
       .from('trips')
       .select('*')
@@ -102,9 +96,6 @@ export const fetchUserTrips = async (): Promise<TripResponseDto> => {
   }
 };
 
-/**
- * Update a trip
- */
 export const updateTrip = async (
   tripId: string,
   updates: Partial<Trip>
@@ -117,7 +108,6 @@ export const updateTrip = async (
       .select();
 
     if (error) {
-      console.error('UPDATE ERROR:', error);
       return {
         success: false,
         error: error.message || 'Trip could not be updated',
@@ -137,9 +127,6 @@ export const updateTrip = async (
   }
 };
 
-/**
- * Delete a trip
- */
 export const deleteTrip = async (tripId: string): Promise<TripResponseDto> => {
   try {
     const { error } = await supabaseClient
@@ -151,7 +138,7 @@ export const deleteTrip = async (tripId: string): Promise<TripResponseDto> => {
       console.error('DELETE ERROR:', error);
       return {
         success: false,
-        error: error.message || 'Trip silinemedi',
+        error: error.message || 'Trip could not be deleted',
       };
     }
 
@@ -162,7 +149,7 @@ export const deleteTrip = async (tripId: string): Promise<TripResponseDto> => {
     console.error('Trip delete error:', error);
     return {
       success: false,
-      error: 'Trip silerken bir hata oluştu',
+      error: 'An error occurred while deleting the trip',
     };
   }
 };

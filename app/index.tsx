@@ -1,5 +1,5 @@
 import SignInPage from '@/src/modules/auth/presentation/pages/SignInPage';
-import { getCurrentSession } from '@/src/modules/auth/services/authService';
+import { supabaseClient } from '@/src/shared/services/supabase';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
@@ -14,13 +14,35 @@ export default function Index() {
 
   const checkSession = async () => {
     try {
-      const response = await getCurrentSession();
-      if (response.success && response.data?.user) {
-        router.replace('/screens/TripsScreen' as any);
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabaseClient.auth.getSession();
+
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        setLoading(false);
+        return;
       }
+
+      if (!session?.user) {
+        setLoading(false);
+        return;
+      }
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabaseClient.auth.getUser();
+
+      if (userError || !user) {
+        await supabaseClient.auth.signOut();
+        setLoading(false);
+        return;
+      }
+      router.replace('/screens/TripsScreen' as any);
     } catch (error) {
       console.error('Session check error:', error);
-    } finally {
       setLoading(false);
     }
   };

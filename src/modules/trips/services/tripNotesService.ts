@@ -1,9 +1,7 @@
 import { supabaseClient } from '@/src/shared/services/supabase';
 import { CreateTripNoteDto, TripNoteResponseDto, UpdateTripNoteDto } from '../data/dto/tripNotes.dto';
 
-/**
- * Create a new trip note
- */
+
 export const createTripNote = async (
   tripId: string,
   noteData: CreateTripNoteDto
@@ -55,9 +53,7 @@ export const createTripNote = async (
   }
 };
 
-/**
- * Fetch all notes for a specific trip
- */
+
 export const fetchTripNotes = async (tripId: string): Promise<TripNoteResponseDto> => {
   try {
     const { data, error } = await supabaseClient
@@ -87,9 +83,6 @@ export const fetchTripNotes = async (tripId: string): Promise<TripNoteResponseDt
   }
 };
 
-/**
- * Update a trip note
- */
 export const updateTripNote = async (
   noteId: string,
   updates: UpdateTripNoteDto
@@ -122,9 +115,6 @@ export const updateTripNote = async (
   }
 };
 
-/**
- * Delete a trip note
- */
 export const deleteTripNote = async (noteId: string): Promise<TripNoteResponseDto> => {
   try {
     const { error } = await supabaseClient
